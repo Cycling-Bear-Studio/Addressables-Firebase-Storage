@@ -1,7 +1,7 @@
-namespace RobinBird.FirebaseTools.Editor
+namespace RobinBird.FirebaseTools.Editor.Storage.Addressables
 {
     using System.IO;
-    using FirebaseTools;
+    using FirebaseTools.Storage.Addressables;
     using UnityEditor.AddressableAssets.Build;
     using UnityEditor.AddressableAssets.Build.DataBuilders;
     using UnityEngine;

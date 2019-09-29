@@ -1,4 +1,4 @@
-namespace RobinBird.FirebaseTools
+namespace RobinBird.FirebaseTools.Storage.Addressables
 {
     using System;
 
