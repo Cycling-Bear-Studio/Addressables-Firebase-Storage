@@ -1,0 +1,57 @@
+namespace BrewTycoon.Modules.Firebase
+{
+    using Systems;
+    using global::Firebase.Extensions;
+    using global::Firebase.Storage;
+    using UnityEngine;
+    using UnityEngine.ResourceManagement.ResourceLocations;
+    using UnityEngine.ResourceManagement.ResourceProviders;
+
+    /// <summary>
+    /// Downloads Hash of the ContentCatalog from FirebaseStorage
+    /// </summary>
+    public class FirebaseStorageHashProvider : ResourceProviderBase
+    {
+        private ProvideHandle provideHandle;
+
+        public override void Provide(ProvideHandle provideHandle)
+        {
+            this.provideHandle = provideHandle;
+            FirebaseSystem.UserLoggedIn += LoadManifest;
+        }
+
+        private void LoadManifest()
+        {
+            FirebaseSystem.UserLoggedIn -= LoadManifest;
+            Debug.Log("Loading manifest: " + provideHandle.Location.InternalId);
+
+            var reference =
+                FirebaseStorage.DefaultInstance.GetReferenceFromUrl(
+                    provideHandle.Location.InternalId.ToLowerInvariant());
+
+            reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCanceled || task.IsFaulted)
+                {
+                    Debug.LogError("Could not load hash: " + task.Exception);
+                    provideHandle.Complete((string) null, false, task.Exception);
+                }
+                else
+                {
+                    string url = task.Result.ToString();
+                    Debug.Log("Loading via URL: " + url);
+
+                    
+                    var catalogLoc =
+                        new ResourceLocationBase(url, url, typeof(TextDataProvider).FullName, typeof(string));
+
+                    provideHandle.ResourceManager.ProvideResource<string>(catalogLoc).Completed += handle =>
+                    {
+                        Debug.Log("Got hash for catalog: " + handle.Result);
+                        provideHandle.Complete(handle.Result, true, null);
+                    };
+                }
+            });
+        }
+    }
+}
