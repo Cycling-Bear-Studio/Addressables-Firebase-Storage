@@ -1,7 +1,6 @@
 {
-    
-    "description": "The Unity Analytics Library contains the Analytics Event Tracker component, the Data Privacy plug-in, and the Standard Events API.", 
-    "displayName": "RobinBird Firebase Tools", 
+    "description": "Collection of tools to support working with Firebase in Unity projects.", 
+    "displayName": "RobinBird.FirebaseTools", 
     "keywords": [
         "firebase", 
         "unity"
@@ -9,10 +8,5 @@
     "name": "robinbird.firebasetools", 
     "readme": "Firebase Tools", 
     "repoPackagePath": "", 
-    "repository": {
-        "revision": "8196036181e573933751e8c0296037c7b6ddca65", 
-        "type": "git", 
-        "url": "https://gitlab.com/robinbird-studios/libraries/unity-plugins/firebase-tools.git"
-    }, 
-    "version": "1.0.0"
+    "version": "1.0.1"
 }
