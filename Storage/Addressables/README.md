@@ -34,7 +34,9 @@ Once the Firebase Intitializion has finished you should set
 FirebaseAddressablesManager.IsFirebaseSetupFinished = true;
 ```
 to tell the Addressables system that the remote assets can now be loaded. If you don't set it the Addressables system won't load anything.
-If your FirebaseStorage authentication rules only allow signed in users to download assets you have to wait until your user is signed-in. Best practice is to give on additional frame between the "Sign-in User Event" from Firebase and starting to use the APIs because the Firebase Systems use the same event to initialize and thus could spawn problems when you already start download assets during init of FirebaseStorage.
+
+
+If your FirebaseStorage authentication rules only allow signed in users to download assets (which I recommend) you have to wait until your user is signed-in. Best practice is to give on additional frame between the "Sign-in User Event" from Firebase and starting to use the APIs because the Firebase Systems use the same event to initialize and thus could spawn problems when you already start download assets during init of FirebaseStorage.
 
 
 ### Configure Build Script (Optional)
@@ -50,3 +52,7 @@ The `catalog.json` is the data structure which Addressables uses to find your as
 If you want to change assets on the remote server and expect users to get this updated assets you need to have your `catalog.json` along with the `catalog.hash` on your server and also retrieve it from the server.
 If you serve assets that never change or only change when you also update your app/game to the customer than you can also use a local catalog and skip this step.
 
+
+### Usage
+
+Use the Addressables window and select `Build->Build Player Content`. Now you should have the bundles in the specified `RemoteBuildPath`. Upload these bundles to Firebase Storage matching the path you set at `RemoteLoadPath`. Hit play and after a small delay to download the bundles you should see your remote Firebase Storage bundles popping up. :)
