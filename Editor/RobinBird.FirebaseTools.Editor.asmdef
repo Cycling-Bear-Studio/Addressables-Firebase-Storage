@@ -1,0 +1,17 @@
+{
+    "name": "RobinBird.FirebaseTools.Editor",
+    "references": [
+        "GUID:d577574d571cf4a2991d4e706ce86364"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
