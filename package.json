@@ -8,5 +8,9 @@
     "name": "robinbird.firebasetools", 
     "readme": "Firebase Tools", 
     "repoPackagePath": "", 
+    "repository": {
+        "type": "git", 
+        "url": "https://gitlab.com/robinbird-studios/libraries/unity-plugins/firebase-tools.git"
+    }, 
     "version": "1.0.1"
 }
