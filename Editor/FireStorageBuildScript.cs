@@ -1,7 +1,7 @@
-namespace BrewTycoon.Editor.Firebase
+namespace RobinBird.FirebaseTools.Editor
 {
     using System.IO;
-    using Modules.Firebase;
+    using FirebaseTools;
     using UnityEditor.AddressableAssets.Build;
     using UnityEditor.AddressableAssets.Build.DataBuilders;
     using UnityEngine;

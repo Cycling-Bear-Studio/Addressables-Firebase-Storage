@@ -1,8 +1,7 @@
-namespace BrewTycoon.Modules.Firebase
+namespace RobinBird.FirebaseTools
 {
-    using global::Firebase.Extensions;
-    using global::Firebase.Storage;
-    using RobinBird.FirebaseTools;
+    using Firebase.Extensions;
+    using Firebase.Storage;
     using UnityEngine;
     using UnityEngine.ResourceManagement.ResourceLocations;
     using UnityEngine.ResourceManagement.ResourceProviders;
