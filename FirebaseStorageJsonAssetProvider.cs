@@ -1,8 +1,8 @@
 namespace BrewTycoon.Modules.Firebase
 {
-    using Systems;
     using global::Firebase.Extensions;
     using global::Firebase.Storage;
+    using RobinBird.FirebaseTools;
     using UnityEngine;
     using UnityEngine.AddressableAssets.ResourceLocators;
     using UnityEngine.ResourceManagement.ResourceLocations;
@@ -30,21 +30,20 @@ namespace BrewTycoon.Modules.Firebase
             }
             
             this.provideHandle = provideHandle;
-            if (string.IsNullOrEmpty(FirebaseSystem.UserUid))
-            {
-                FirebaseSystem.UserLoggedIn += LoadManifest;
-            }
-            else
+            if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
             {
                 LoadManifest();
             }
-
+            else
+            {
+                FirebaseAddressablesManager.FirebaseSetupFinished += LoadManifest;
+            }
         }
 
         private void LoadManifest()
         {
-            FirebaseSystem.UserLoggedIn -= LoadManifest;
-            Debug.Log("LOADING MANIFEST: " + provideHandle.Location.InternalId);
+            FirebaseAddressablesManager.FirebaseSetupFinished -= LoadManifest;
+            Debug.Log("Loading Json at: " + provideHandle.Location.InternalId);
             
             var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId.ToLowerInvariant());
 

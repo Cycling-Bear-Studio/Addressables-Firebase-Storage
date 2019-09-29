@@ -1,8 +1,8 @@
 namespace BrewTycoon.Modules.Firebase
 {
-    using Systems;
     using global::Firebase.Extensions;
     using global::Firebase.Storage;
+    using RobinBird.FirebaseTools;
     using UnityEngine;
     using UnityEngine.ResourceManagement.ResourceLocations;
     using UnityEngine.ResourceManagement.ResourceProviders;
@@ -17,12 +17,12 @@ namespace BrewTycoon.Modules.Firebase
         public override void Provide(ProvideHandle provideHandle)
         {
             this.provideHandle = provideHandle;
-            FirebaseSystem.UserLoggedIn += LoadManifest;
+            FirebaseAddressablesManager.FirebaseSetupFinished += LoadManifest;
         }
 
         private void LoadManifest()
         {
-            FirebaseSystem.UserLoggedIn -= LoadManifest;
+            FirebaseAddressablesManager.FirebaseSetupFinished -= LoadManifest;
             Debug.Log("Loading manifest: " + provideHandle.Location.InternalId);
 
             var reference =

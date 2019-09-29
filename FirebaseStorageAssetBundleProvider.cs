@@ -1,8 +1,8 @@
 namespace BrewTycoon.Modules.Firebase
 {
-    using Systems;
     using global::Firebase.Extensions;
     using global::Firebase.Storage;
+    using RobinBird.FirebaseTools;
     using UnityEngine;
     using UnityEngine.AddressableAssets.ResourceLocators;
     using UnityEngine.ResourceManagement.ResourceLocations;
@@ -19,13 +19,13 @@ namespace BrewTycoon.Modules.Firebase
         {
             this.provideHandle = provideHandle;
 
-            if (string.IsNullOrEmpty(FirebaseSystem.UserUid))
+            if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
             {
-                FirebaseSystem.UserLoggedIn += LoadResource;
+                LoadResource();
             }
             else
             {
-                LoadResource();
+                FirebaseAddressablesManager.FirebaseSetupFinished += LoadResource;
             }
         }
 
