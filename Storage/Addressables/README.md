@@ -29,6 +29,13 @@ Addressables.ResourceManager.ResourceProviders.Add(new FirebaseStorageJsonAssetP
 Addressables.ResourceManager.ResourceProviders.Add(new FirebaseStorageHashProvider());
 ```
 
+Once the Firebase Intitializion has finished you should set 
+``` csharp
+FirebaseAddressablesManager.IsFirebaseSetupFinished = true;
+```
+to tell the Addressables system that the remote assets can now be loaded. If you don't set it the Addressables system won't load anything.
+If your FirebaseStorage authentication rules only allow signed in users to download assets you have to wait until your user is signed-in. Best practice is to give on additional frame between the "Sign-in User Event" from Firebase and starting to use the APIs because the Firebase Systems use the same event to initialize and thus could spawn problems when you already start download assets during init of FirebaseStorage.
+
 
 ### Configure Build Script (Optional)
 
