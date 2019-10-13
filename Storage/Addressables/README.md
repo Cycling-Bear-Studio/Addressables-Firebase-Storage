@@ -4,6 +4,10 @@
 
 Firebase offers a global CDN infrastructure to distribute content to authenticated clients. If should be easy to use this infrastructure in combination with Unity Addressables to provide downloadable AssetBundles to user clients.
 
+## Examples
+
+Examples can be found ![HERE](https://gitlab.com/robinbird-studios/hives/firebase-tools-hive)
+
 ## Setup
 
 ### Configure Remote Path
