@@ -12,23 +12,19 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
     /// </summary>
     public class FirebaseStorageAssetBundleProvider : AssetBundleProvider
     {
-        private ProvideHandle provideHandle;
-
         public override void Provide(ProvideHandle provideHandle)
         {
-            this.provideHandle = provideHandle;
-
             if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
             {
-                LoadResource();
+                LoadResource(provideHandle);
             }
             else
             {
-                FirebaseAddressablesManager.FirebaseSetupFinished += LoadResource;
+                FirebaseAddressablesManager.FirebaseSetupFinished += () => { LoadResource(provideHandle); };
             }
         }
 
-        private void LoadResource()
+        private void LoadResource(ProvideHandle provideHandle)
         {
             var reference =
                 FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId.ToLowerInvariant());
