@@ -1,5 +1,6 @@
 namespace RobinBird.FirebaseTools.Storage.Addressables
 {
+    using System.Collections.Generic;
     using Firebase.Extensions;
     using Firebase.Storage;
     using UnityEngine;
@@ -39,9 +40,29 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 }
 
                 var url = task.Result.ToString();
-                var bundleLoc = new ResourceLocationBase(url, url, typeof(AssetBundleProvider).FullName,
-                    typeof(IResourceLocator));
+                IResourceLocation[] dependencies;
+                IList<IResourceLocation> originalDependencies = provideHandle.Location.Dependencies;
+                if (originalDependencies != null)
+                {
+                    dependencies = new IResourceLocation[originalDependencies.Count];
+                    for (int i = 0; i < originalDependencies.Count; i++)
+                    {
+                        var dependency = originalDependencies[i];
 
+                        dependencies[i] = dependency;
+                    }
+                }
+                else
+                {
+                    dependencies = new IResourceLocation[0];
+                }
+                var bundleLoc = new ResourceLocationBase(url, url, typeof(AssetBundleProvider).FullName,
+                    typeof(IResourceLocator), dependencies)
+                {
+                    Data = provideHandle.Location.Data,
+                    PrimaryKey = provideHandle.Location.PrimaryKey
+                };
+                
                 provideHandle.ResourceManager.ProvideResource<IAssetBundleResource>(bundleLoc).Completed += handle =>
                 {
                     provideHandle.Complete(handle.Result, true, null);
