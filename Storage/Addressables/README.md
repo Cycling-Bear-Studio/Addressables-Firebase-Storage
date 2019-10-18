@@ -6,7 +6,7 @@ Firebase offers a global CDN infrastructure to distribute content to authenticat
 
 ## Examples
 
-Examples can be found ![HERE](https://gitlab.com/robinbird-studios/hives/firebase-tools-hive)
+Examples can be found [HERE](https://gitlab.com/robinbird-studios/hives/firebase-tools-hive)
 
 ## Setup
 
@@ -45,10 +45,40 @@ If your FirebaseStorage authentication rules only allow signed in users to downl
 
 ### Configure Build Script (Optional)
 
+1. Add the `FirebaseStorageBuild` Scriptable Object to your Assets directory
+
+![BuildScriptSO](https://gitlab.com/robinbird-studios/misc/readme-assets/raw/master/firebase-tools/CreateBuildScriptAsset.png)
+
+2. Reference the DataBuilder on the main `AddressableAssetSettings`
+
+![ReferenceDataBuilder](https://gitlab.com/robinbird-studios/misc/readme-assets/raw/master/firebase-tools/ReferenceBuildScriptDataBuilder.png)
+
+3. Select the build script in the Addressable window and rebuild your bundles
+
+
 ![BuildScript](https://gitlab.com/robinbird-studios/misc/readme-assets/raw/master/firebase-tools/BuildScriptSelection.png?inline=false)
 
 If you want that the `catalog.json` is also loaded from Firebase Storage you have to select a custom build script which will make sure that the catalog location is properly set.
-You also have to set the property `Build Remote Catalog` to true in the main `AddressableAssetSettings.asset` settings.
+You also have to set the property `Build Remote Catalog` to true in the main `AddressableAssetSettings.asset` settings. If you want to keep your `catalog.json` in the build you should not configure this build script and just normally build with the default `Packed Mode`.
+
+If everyting is setup and you build your bundles with the `FirebaseBase Storage Build` then you can check the `settings.json` which was created in the `LocalBuildPath` ( configured in `AddressableAssetSettings`). The settings should contain this entry:
+
+``` json
+{
+    "m_Keys": [
+        "AddressablesMainContentCatalogRemoteHash"
+    ],
+    "m_InternalId": "gs://robinbird-firebasetools.appspot.com/assets/Android/catalog_1.hash",
+    "m_Provider": "RobinBird.FirebaseTools.Storage.Addressables.FirebaseStorageHashProvider",
+    "m_Dependencies": [],
+    "m_ResourceType": {
+        "m_AssemblyName": "mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+        "m_ClassName": "System.String"
+    }
+}
+```
+
+Important to note here is that the `m_Provider` is set to the `FirebaseStorageHashProvider`.
 
 #### Understanding this decision:
 
@@ -60,3 +90,14 @@ If you serve assets that never change or only change when you also update your a
 ### Usage
 
 Use the Addressables window and select `Build->Build Player Content`. Now you should have the bundles in the specified `RemoteBuildPath`. Upload these bundles to Firebase Storage matching the path you set at `RemoteLoadPath`. Hit play and after a small delay to download the bundles you should see your remote Firebase Storage bundles popping up. :)
+
+
+### FAQ
+
+#### If your bundles don't load and you get the error
+```
+Addressables - initialization failed.
+UnityEngine.AddressableAssets.Initialization.<>c__DisplayClass14_0:<LoadContentCatalogInternal>b__0(AsyncOperationHandle`1)
+```
+
+You probably have not built your bundles with the `Firebase Storage Build`. Check `Configure Build Script (Optional)`
