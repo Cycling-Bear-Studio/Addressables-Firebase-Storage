@@ -16,7 +16,14 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
         public override void Provide(ProvideHandle provideHandle)
         {
             this.provideHandle = provideHandle;
-            FirebaseAddressablesManager.FirebaseSetupFinished += LoadManifest;
+            if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
+            {
+                LoadManifest();
+            }
+            else
+            {
+                FirebaseAddressablesManager.FirebaseSetupFinished += LoadManifest;
+            }
         }
 
         private void LoadManifest()
