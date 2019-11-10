@@ -1,5 +1,6 @@
 namespace RobinBird.FirebaseTools.Storage.Addressables
 {
+    using System.ComponentModel;
     using Firebase.Extensions;
     using Firebase.Storage;
     using UnityEngine;
@@ -9,6 +10,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
     /// <summary>
     /// Downloads Hash of the ContentCatalog from FirebaseStorage
     /// </summary>
+    [DisplayName("Firebase Hash Provider")]
     public class FirebaseStorageHashProvider : ResourceProviderBase
     {
         private ProvideHandle provideHandle;

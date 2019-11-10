@@ -1,5 +1,6 @@
 namespace RobinBird.FirebaseTools.Storage.Addressables
 {
+    using System.ComponentModel;
     using Firebase.Extensions;
     using Firebase.Storage;
     using UnityEngine;
@@ -10,6 +11,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
     /// <summary>
     /// Loads JSON data from FirebaseStorage. Needed mainly for ContentCatalog downloads
     /// </summary>
+    [DisplayName("Firebase Json Asset Provider")]
     public class FirebaseStorageJsonAssetProvider : JsonAssetProvider
     {
         private ProvideHandle provideHandle;

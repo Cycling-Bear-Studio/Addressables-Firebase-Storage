@@ -1,6 +1,7 @@
 namespace RobinBird.FirebaseTools.Storage.Addressables
 {
     using System.Collections.Generic;
+    using System.ComponentModel;
     using Firebase.Extensions;
     using Firebase.Storage;
     using UnityEngine;
@@ -11,6 +12,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
     /// <summary>
     /// Loads bundles from the Firebase Storage CDN
     /// </summary>
+    [DisplayName("Firebase AssetBundle Provider")]
     public class FirebaseStorageAssetBundleProvider : AssetBundleProvider
     {
         public override void Provide(ProvideHandle provideHandle)
