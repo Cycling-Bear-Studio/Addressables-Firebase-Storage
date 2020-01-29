@@ -83,7 +83,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 {
                     dependencies = new IResourceLocation[0];
                 }
-                var bundleLoc = new ResourceLocationBase(url, url, typeof(AssetBundleProvider).FullName,
+                var bundleLoc = new ResourceLocationBase(url, url, GetType().FullName,
                     typeof(IResourceLocator), dependencies)
                 {
                     Data = provideHandle.Location.Data,
