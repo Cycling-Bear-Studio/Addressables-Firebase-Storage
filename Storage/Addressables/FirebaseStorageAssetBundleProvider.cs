@@ -55,7 +55,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
         private void LoadResource(ProvideHandle provideHandle)
         {
             var reference =
-                FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId.ToLowerInvariant());
+                FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId);
 
             reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
             {

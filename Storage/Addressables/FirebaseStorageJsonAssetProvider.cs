@@ -46,7 +46,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
             FirebaseAddressablesManager.FirebaseSetupFinished -= LoadManifest;
             Debug.Log("Loading Json at: " + provideHandle.Location.InternalId);
             
-            var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId.ToLowerInvariant());
+            var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId);
 
             reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
             {
