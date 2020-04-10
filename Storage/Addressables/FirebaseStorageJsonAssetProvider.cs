@@ -24,8 +24,8 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         public override void Provide(ProvideHandle provideHandle)
         {
-            if (provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.NATIVE_GS_URL_START) == false
-                && provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START) == false)
+            var url = UnityEngine.AddressableAssets.Addressables.ResourceManager.TransformInternalId(provideHandle.Location);
+            if (FirebaseAddressablesManager.IsFirebaseStorageLocation(url) == false)
             {
                 base.Provide(provideHandle);
                 return;
@@ -45,9 +45,10 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
         private void LoadManifest()
         {
             FirebaseAddressablesManager.FirebaseSetupFinished -= LoadManifest;
-            Debug.Log("Loading Json at: " + provideHandle.Location.InternalId);
+            var locationPath = UnityEngine.AddressableAssets.Addressables.ResourceManager.TransformInternalId(provideHandle.Location);
+            Debug.Log("Loading Json at: " + locationPath);
             
-            var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId);
+            var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(locationPath);
 
             reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
             {

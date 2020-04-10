@@ -41,30 +41,12 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
         public override void Provide(ProvideHandle provideHandle)
         {
             string path = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
-            bool isUsingNativeUrl = path.StartsWith(FirebaseAddressablesConstants.NATIVE_GS_URL_START);
-            if (isUsingNativeUrl == false
-                && path.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START) == false)
+            if (FirebaseAddressablesManager.IsFirebaseStorageLocation(path) == false)
             {
                 base.Provide(provideHandle);
                 return;
             }
-            
-            if (isUsingNativeUrl && hasPrintedProtocolWarning == false)
-            {
-                string patchedUrl = path.Replace(
-                    FirebaseAddressablesConstants.NATIVE_GS_URL_START,
-                    FirebaseAddressablesConstants.PATCHED_GS_URL_START);
-                
-                Debug.LogWarning($"You are currently using an url with the" +
-                                 $" '{FirebaseAddressablesConstants.NATIVE_GS_URL_START}' protocol. This will work but" +
-                                 $" it is recommended to use the '{FirebaseAddressablesConstants.PATCHED_GS_URL_START}'" +
-                                 $" format to get full features of Addressables. Currently Addressables checks for 'http'" +
-                                 $" in the InternalId to decide if the asset is remote. Things like GetDownloadSizeAsync()" +
-                                 $" will not work. Please change your url to '{patchedUrl}'");
-                
-                hasPrintedProtocolWarning = true;
-            }
-            
+
             if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
             {
                 LoadResource(provideHandle);
@@ -77,16 +59,9 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         private void LoadResource(ProvideHandle provideHandle)
         {
-            string path = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
-            string firebaseUrl = path;
-            if (firebaseUrl.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START))
-            {
-                firebaseUrl = firebaseUrl.Replace(
-                    FirebaseAddressablesConstants.PATCHED_GS_URL_START,
-                    FirebaseAddressablesConstants.NATIVE_GS_URL_START);
-            }
-            var reference =
-                FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);
+            string firebaseUrl = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
+            
+            var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);
 
             reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
             {
@@ -98,7 +73,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 }
 
                 string url = task.Result.ToString();
-                FirebaseAddressablesCache.SetInternalIdToStorageUrlMapping(path, url);
+                FirebaseAddressablesCache.SetInternalIdToStorageUrlMapping(firebaseUrl, url);
                 IResourceLocation[] dependencies;
                 IList<IResourceLocation> originalDependencies = provideHandle.Location.Dependencies;
                 if (originalDependencies != null)
@@ -123,7 +98,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 };
 
                 AsyncOperationHandle<IAssetBundleResource> asyncOperationHandle;
-                if (bundleOperationHandles.TryGetValue(path, out asyncOperationHandle))
+                if (bundleOperationHandles.TryGetValue(firebaseUrl, out asyncOperationHandle))
                 {
                     // Release already running handler
                     if (asyncOperationHandle.IsValid())
@@ -132,7 +107,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                     }
                 }
                 asyncOperationHandle = provideHandle.ResourceManager.ProvideResource<IAssetBundleResource>(bundleLoc);
-                bundleOperationHandles.Add(path, asyncOperationHandle);
+                bundleOperationHandles.Add(firebaseUrl, asyncOperationHandle);
                 asyncOperationHandle.Completed += handle =>
                 {
                     provideHandle.Complete(handle.Result, true, null);
