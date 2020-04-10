@@ -40,9 +40,10 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         public override void Provide(ProvideHandle provideHandle)
         {
-            bool isUsingNativeUrl = provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.NATIVE_GS_URL_START);
+            string path = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
+            bool isUsingNativeUrl = path.StartsWith(FirebaseAddressablesConstants.NATIVE_GS_URL_START);
             if (isUsingNativeUrl == false
-                && provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START) == false)
+                && path.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START) == false)
             {
                 base.Provide(provideHandle);
                 return;
@@ -50,7 +51,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
             
             if (isUsingNativeUrl && hasPrintedProtocolWarning == false)
             {
-                string patchedUrl = provideHandle.Location.InternalId.Replace(
+                string patchedUrl = path.Replace(
                     FirebaseAddressablesConstants.NATIVE_GS_URL_START,
                     FirebaseAddressablesConstants.PATCHED_GS_URL_START);
                 
@@ -76,7 +77,8 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         private void LoadResource(ProvideHandle provideHandle)
         {
-            string firebaseUrl = provideHandle.Location.InternalId;
+            string path = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
+            string firebaseUrl = path;
             if (firebaseUrl.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START))
             {
                 firebaseUrl = firebaseUrl.Replace(
@@ -96,6 +98,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 }
 
                 string url = task.Result.ToString();
+                FirebaseAddressablesCache.SetInternalIdToStorageUrlMapping(path, url);
                 IResourceLocation[] dependencies;
                 IList<IResourceLocation> originalDependencies = provideHandle.Location.Dependencies;
                 if (originalDependencies != null)
@@ -120,7 +123,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 };
 
                 AsyncOperationHandle<IAssetBundleResource> asyncOperationHandle;
-                if (bundleOperationHandles.TryGetValue(provideHandle.Location.InternalId, out asyncOperationHandle))
+                if (bundleOperationHandles.TryGetValue(path, out asyncOperationHandle))
                 {
                     // Release already running handler
                     if (asyncOperationHandle.IsValid())
@@ -129,7 +132,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                     }
                 }
                 asyncOperationHandle = provideHandle.ResourceManager.ProvideResource<IAssetBundleResource>(bundleLoc);
-                bundleOperationHandles.Add(provideHandle.Location.InternalId, asyncOperationHandle);
+                bundleOperationHandles.Add(path, asyncOperationHandle);
                 asyncOperationHandle.Completed += handle =>
                 {
                     provideHandle.Complete(handle.Result, true, null);
