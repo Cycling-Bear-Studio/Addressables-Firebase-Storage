@@ -17,6 +17,8 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
     [DisplayName("Firebase AssetBundle Provider")]
     public class FirebaseStorageAssetBundleProvider : AssetBundleProvider
     {
+        private static bool hasPrintedProtocolWarning;
+        
         public readonly Dictionary<string, AsyncOperationHandle<IAssetBundleResource>> bundleOperationHandles = new Dictionary<string, AsyncOperationHandle<IAssetBundleResource>>();
         
         public override void Release(IResourceLocation location, object asset)
@@ -33,14 +35,33 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 bundleOperationHandles.Remove(location.InternalId);
             }
         }
+        
+        
 
         public override void Provide(ProvideHandle provideHandle)
         {
-            if (provideHandle.Location.InternalId.StartsWith("gs") == false
-                && provideHandle.Location.InternalId.StartsWith("httpgs") == false)
+            bool isUsingNativeUrl = provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.NATIVE_GS_URL_START);
+            if (isUsingNativeUrl == false
+                && provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START) == false)
             {
                 base.Provide(provideHandle);
                 return;
+            }
+            
+            if (isUsingNativeUrl && hasPrintedProtocolWarning == false)
+            {
+                string patchedUrl = provideHandle.Location.InternalId.Replace(
+                    FirebaseAddressablesConstants.NATIVE_GS_URL_START,
+                    FirebaseAddressablesConstants.PATCHED_GS_URL_START);
+                
+                Debug.LogWarning($"You are currently using an url with the" +
+                                 $" '{FirebaseAddressablesConstants.NATIVE_GS_URL_START}' protocol. This will work but" +
+                                 $" it is recommended to use the '{FirebaseAddressablesConstants.PATCHED_GS_URL_START}'" +
+                                 $" format to get full features of Addressables. Currently Addressables checks for 'http'" +
+                                 $" in the InternalId to decide if the asset is remote. Things like GetDownloadSizeAsync()" +
+                                 $" will not work. Please change your url to '{patchedUrl}'");
+                
+                hasPrintedProtocolWarning = true;
             }
             
             if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
@@ -56,11 +77,11 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
         private void LoadResource(ProvideHandle provideHandle)
         {
             string firebaseUrl = provideHandle.Location.InternalId;
-            if (firebaseUrl.StartsWith("httpgs://"))
+            if (firebaseUrl.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START))
             {
-                // Workaround for GetDownloadSizeAsync method because only ids with http at the beginning are considered
-                // in the calculation
-                firebaseUrl = firebaseUrl.Replace("httpgs://", "gs://");
+                firebaseUrl = firebaseUrl.Replace(
+                    FirebaseAddressablesConstants.PATCHED_GS_URL_START,
+                    FirebaseAddressablesConstants.NATIVE_GS_URL_START);
             }
             var reference =
                 FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);

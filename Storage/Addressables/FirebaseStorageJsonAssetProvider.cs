@@ -24,13 +24,13 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         public override void Provide(ProvideHandle provideHandle)
         {
-            if (provideHandle.Location.InternalId.StartsWith("gs") == false
-                && provideHandle.Location.InternalId.StartsWith("httpgs") == false)
+            if (provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.NATIVE_GS_URL_START) == false
+                && provideHandle.Location.InternalId.StartsWith(FirebaseAddressablesConstants.PATCHED_GS_URL_START) == false)
             {
                 base.Provide(provideHandle);
                 return;
             }
-            
+
             this.provideHandle = provideHandle;
             if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
             {
