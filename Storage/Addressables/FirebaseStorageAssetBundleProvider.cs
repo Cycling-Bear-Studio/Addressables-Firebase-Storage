@@ -17,8 +17,6 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
     [DisplayName("Firebase AssetBundle Provider")]
     public class FirebaseStorageAssetBundleProvider : AssetBundleProvider
     {
-        private static bool hasPrintedProtocolWarning;
-        
         public readonly Dictionary<string, AsyncOperationHandle<IAssetBundleResource>> bundleOperationHandles = new Dictionary<string, AsyncOperationHandle<IAssetBundleResource>>();
         
         public override void Release(IResourceLocation location, object asset)
