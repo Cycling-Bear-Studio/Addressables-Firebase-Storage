@@ -26,11 +26,11 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
             base.Release(location, asset);
 
             // We have to make sure that the actual Bundle Load operation for this asset also gets released together with the Firebase Resource
-            if (bundleOperationHandles.TryGetValue(location.InternalId, out AsyncOperationHandle<IAssetBundleResource> opertion))
+            if (bundleOperationHandles.TryGetValue(location.InternalId, out AsyncOperationHandle<IAssetBundleResource> operation))
             {
-                if (opertion.IsValid())
+                if (operation.IsValid())
                 {
-                    Addressables.ResourceManager.Release(opertion);
+                    Addressables.ResourceManager.Release(operation);
                 }
                 bundleOperationHandles.Remove(location.InternalId);
             }
