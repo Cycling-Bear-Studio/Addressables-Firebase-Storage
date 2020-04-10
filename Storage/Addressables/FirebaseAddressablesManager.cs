@@ -26,6 +26,12 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         public static event Action FirebaseSetupFinished;
 
+        public static bool IsFirebaseStorageLocation(string internalId)
+        {
+            return internalId.StartsWith(FirebaseAddressablesConstants.GS_URL_START);
+
+        }
+
         private static void FireFirebaseSetupFinished()
         {
             FirebaseSetupFinished?.Invoke();

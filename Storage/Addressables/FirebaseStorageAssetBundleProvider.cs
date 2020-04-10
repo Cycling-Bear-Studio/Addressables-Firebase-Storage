@@ -24,24 +24,27 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
             base.Release(location, asset);
 
             // We have to make sure that the actual Bundle Load operation for this asset also gets released together with the Firebase Resource
-            if (bundleOperationHandles.TryGetValue(location.InternalId, out AsyncOperationHandle<IAssetBundleResource> opertion))
+            if (bundleOperationHandles.TryGetValue(location.InternalId, out AsyncOperationHandle<IAssetBundleResource> operation))
             {
-                if (opertion.IsValid())
+                if (operation.IsValid())
                 {
-                    Addressables.ResourceManager.Release(opertion);
+                    Addressables.ResourceManager.Release(operation);
                 }
                 bundleOperationHandles.Remove(location.InternalId);
             }
         }
+        
+        
 
         public override void Provide(ProvideHandle provideHandle)
         {
-            if (provideHandle.Location.InternalId.StartsWith("gs") == false)
+            string path = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
+            if (FirebaseAddressablesManager.IsFirebaseStorageLocation(path) == false)
             {
                 base.Provide(provideHandle);
                 return;
             }
-            
+
             if (FirebaseAddressablesManager.IsFirebaseSetupFinished)
             {
                 LoadResource(provideHandle);
@@ -54,19 +57,21 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         private void LoadResource(ProvideHandle provideHandle)
         {
-            var reference =
-                FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId);
+            string firebaseUrl = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
+            
+            var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);
 
             reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
             {
                 if (task.IsCanceled || task.IsFaulted)
                 {
-                    Debug.LogError("Could not get url for: " + provideHandle.Location.InternalId + ", " + task.Exception);
+                    Debug.LogError($"Could not get url for: {firebaseUrl}, {task.Exception}");
                     provideHandle.Complete(this, false, task.Exception);
                     return;
                 }
 
-                var url = task.Result.ToString();
+                string url = task.Result.ToString();
+                FirebaseAddressablesCache.SetInternalIdToStorageUrlMapping(firebaseUrl, url);
                 IResourceLocation[] dependencies;
                 IList<IResourceLocation> originalDependencies = provideHandle.Location.Dependencies;
                 if (originalDependencies != null)
@@ -91,7 +96,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 };
 
                 AsyncOperationHandle<IAssetBundleResource> asyncOperationHandle;
-                if (bundleOperationHandles.TryGetValue(provideHandle.Location.InternalId, out asyncOperationHandle))
+                if (bundleOperationHandles.TryGetValue(firebaseUrl, out asyncOperationHandle))
                 {
                     // Release already running handler
                     if (asyncOperationHandle.IsValid())
@@ -100,7 +105,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                     }
                 }
                 asyncOperationHandle = provideHandle.ResourceManager.ProvideResource<IAssetBundleResource>(bundleLoc);
-                bundleOperationHandles.Add(provideHandle.Location.InternalId, asyncOperationHandle);
+                bundleOperationHandles.Add(firebaseUrl, asyncOperationHandle);
                 asyncOperationHandle.Completed += handle =>
                 {
                     provideHandle.Complete(handle.Result, true, null);
