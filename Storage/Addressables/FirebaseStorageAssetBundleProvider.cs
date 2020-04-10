@@ -36,7 +36,8 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         public override void Provide(ProvideHandle provideHandle)
         {
-            if (provideHandle.Location.InternalId.StartsWith("gs") == false)
+            if (provideHandle.Location.InternalId.StartsWith("gs") == false
+                && provideHandle.Location.InternalId.StartsWith("httpgs") == false)
             {
                 base.Provide(provideHandle);
                 return;
@@ -54,19 +55,26 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         private void LoadResource(ProvideHandle provideHandle)
         {
+            string firebaseUrl = provideHandle.Location.InternalId;
+            if (firebaseUrl.StartsWith("httpgs://"))
+            {
+                // Workaround for GetDownloadSizeAsync method because only ids with http at the beginning are considered
+                // in the calculation
+                firebaseUrl = firebaseUrl.Replace("httpgs://", "gs://");
+            }
             var reference =
-                FirebaseStorage.DefaultInstance.GetReferenceFromUrl(provideHandle.Location.InternalId);
+                FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);
 
             reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
             {
                 if (task.IsCanceled || task.IsFaulted)
                 {
-                    Debug.LogError("Could not get url for: " + provideHandle.Location.InternalId + ", " + task.Exception);
+                    Debug.LogError($"Could not get url for: {firebaseUrl}, {task.Exception}");
                     provideHandle.Complete(this, false, task.Exception);
                     return;
                 }
 
-                var url = task.Result.ToString();
+                string url = task.Result.ToString();
                 IResourceLocation[] dependencies;
                 IList<IResourceLocation> originalDependencies = provideHandle.Location.Dependencies;
                 if (originalDependencies != null)

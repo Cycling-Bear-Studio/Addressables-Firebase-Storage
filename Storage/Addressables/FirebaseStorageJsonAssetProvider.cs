@@ -24,7 +24,8 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
 
         public override void Provide(ProvideHandle provideHandle)
         {
-            if (provideHandle.Location.InternalId.StartsWith("gs") == false)
+            if (provideHandle.Location.InternalId.StartsWith("gs") == false
+                && provideHandle.Location.InternalId.StartsWith("httpgs") == false)
             {
                 base.Provide(provideHandle);
                 return;
