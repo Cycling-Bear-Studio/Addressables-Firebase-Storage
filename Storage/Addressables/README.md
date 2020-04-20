@@ -1,5 +1,8 @@
 # Firebase Storage with Addressables
 
+Works with any Addressable Version but not with all features
+Using `Addressables.GetDownloadSizeAsync` requires Addressables >=1.75.
+
 ## Motivation
 
 Firebase offers a global CDN infrastructure to distribute content to authenticated clients. If should be easy to use this infrastructure in combination with Unity Addressables to provide downloadable AssetBundles to user clients.
@@ -25,12 +28,15 @@ Make sure that all groups configured in the Addressables window that you want to
 
 ### Configure Scripts
 
-Before you load any Addressable Asset you have to add the FirebaseStorage Provides to the Addressables API:
+Before you load any Addressable Asset you have to add the FirebaseStorage Providers and hooks to the Addressables API:
 
 ``` csharp
 Addressables.ResourceManager.ResourceProviders.Add(new FirebaseStorageAssetBundleProvider());
 Addressables.ResourceManager.ResourceProviders.Add(new FirebaseStorageJsonAssetProvider());
 Addressables.ResourceManager.ResourceProviders.Add(new FirebaseStorageHashProvider());
+
+// This requires Addressables >=1.75 and can be commented out for lower versions
+Addressables.InternalIdTransformFunc += FirebaseAddressablesCache.IdTransformFunc;
 ```
 
 Once the Firebase Intitializion has finished you should set 
@@ -86,6 +92,33 @@ The `catalog.json` is the data structure which Addressables uses to find your as
 If you want to change assets on the remote server and expect users to get this updated assets you need to have your `catalog.json` along with the `catalog.hash` on your server and also retrieve it from the server.
 If you serve assets that never change or only change when you also update your app/game to the customer than you can also use a local catalog and skip this step.
 
+### GetDownloadSizeAsync
+
+ATTENTION: This requires Addressables Version >1.75 because we need the `Addressables.InternalIdTransformFunc` callback.
+
+You can retrieve the download size by using the `Addressables.GetDownloadSizeAsync()` method but there is a special condition when you want to get the download size of Addressables that reside on Firebase Storage.
+First you have to call `FirebaseAddressablesCache.PreWarmDependencies()` to instruct Firebase Storage to retrieve the information of the CDN which then is used by Unity's method to calculate the download size.
+
+Code from the example project:
+``` csharp
+FirebaseAddressablesCache.PreWarmDependencies(downloadAssetKey, () =>
+{
+    var handler = Addressables.GetDownloadSizeAsync(downloadAssetKey);
+    
+    handler.Completed += handle =>
+    {
+        if (handle.Status == AsyncOperationStatus.Failed)
+        {
+            Debug.LogError($"Get Download size failed because of error: {handle.OperationException}");
+        }
+        else
+        {
+            Debug.Log($"Got download size of: {handle.Result}");
+        }
+    }
+});
+```
+
 
 ### Usage
 
@@ -101,3 +134,9 @@ UnityEngine.AddressableAssets.Initialization.<>c__DisplayClass14_0:<LoadContentC
 ```
 
 You probably have not built your bundles with the `Firebase Storage Build`. Check `Configure Build Script (Optional)`
+
+#### Addressables.GetDownloadSizeAsync() returns always 0
+
+Check if you cleared your cache with [Caching.ClearCache](https://docs.unity3d.com/ScriptReference/Caching.ClearCache.html). Addressables which are in the cache will not count towards the download size.
+Check if you have registered the `Addressables.InternalIdTransformFunc` as described above
+Check if you call and wait for the callback of `FirebaseAddressablesCache.PreWarmDependencies()`

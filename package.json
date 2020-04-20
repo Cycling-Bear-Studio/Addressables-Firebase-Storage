@@ -12,5 +12,8 @@
         "type": "git", 
         "url": "https://gitlab.com/robinbird-studios/libraries/unity-plugins/firebase-tools.git"
     }, 
-    "version": "1.0.2"
+    "version": "1.0.3",
+    "dependencies": {
+        "com.unity.addressables": "1.7.5"
+    }
 }
