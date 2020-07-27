@@ -1,3 +1,5 @@
+using Firebase;
+
 namespace RobinBird.FirebaseTools.Storage.Addressables
 {
     using System.Collections.Generic;
@@ -39,8 +41,10 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
         public override void Provide(ProvideHandle provideHandle)
         {
             string path = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
+            LogInfo($"Transformed {provideHandle.Location.InternalId} to {path}");
             if (FirebaseAddressablesManager.IsFirebaseStorageLocation(path) == false)
             {
+                LogInfo("No Firebase file. Redirecting to base Unity provider");
                 base.Provide(provideHandle);
                 return;
             }
@@ -51,6 +55,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
             }
             else
             {
+                LogInfo("Delaying load until Firebase is setup");
                 FirebaseAddressablesManager.FirebaseSetupFinished += () => { LoadResource(provideHandle); };
             }
         }
@@ -59,6 +64,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
         {
             string firebaseUrl = provideHandle.ResourceManager.TransformInternalId(provideHandle.Location);
             
+            LogInfo($"Loading from {firebaseUrl}");
             var reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);
 
             reference.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
@@ -71,6 +77,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 }
 
                 string url = task.Result.ToString();
+                LogInfo($"Applying cache from {firebaseUrl} to {url}");
                 FirebaseAddressablesCache.SetInternalIdToStorageUrlMapping(firebaseUrl, url);
                 IResourceLocation[] dependencies;
                 IList<IResourceLocation> originalDependencies = provideHandle.Location.Dependencies;
@@ -81,6 +88,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                     {
                         var dependency = originalDependencies[i];
 
+                        LogInfo($"Setting up dependency: {dependency.InternalId}");
                         dependencies[i] = dependency;
                     }
                 }
@@ -104,6 +112,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                         provideHandle.ResourceManager.Release(asyncOperationHandle);
                     }
                 }
+                LogInfo($"Passing fetched Firebase Url to Unity AssetBundle at: {bundleLoc.PrimaryKey}");
                 asyncOperationHandle = provideHandle.ResourceManager.ProvideResource<IAssetBundleResource>(bundleLoc);
                 bundleOperationHandles.Add(firebaseUrl, asyncOperationHandle);
                 asyncOperationHandle.Completed += handle =>
@@ -111,6 +120,14 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                     provideHandle.Complete(handle.Result, true, null);
                 };
             });
+        }
+
+        private void LogInfo(string log)
+        {
+            if (FirebaseAddressablesManager.LogLevel <= LogLevel.Info)
+            {
+                Debug.Log(log);
+            }
         }
     }
 }
