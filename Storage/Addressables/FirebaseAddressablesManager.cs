@@ -1,3 +1,5 @@
+using Firebase;
+
 namespace RobinBird.FirebaseTools.Storage.Addressables
 {
     using System;
@@ -23,6 +25,8 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 }
             }
         }
+
+        public static LogLevel LogLevel = LogLevel.Warning;
 
         public static event Action FirebaseSetupFinished;
 
