@@ -68,6 +68,7 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                 return;
             }
             runningFetchUrlOperationCount = 0;
+            StorageReference reference = null;
             foreach (var key in keys)
             {
                 foreach (IResourceLocator locator in UnityEngine.AddressableAssets.Addressables.ResourceLocators)
@@ -84,9 +85,12 @@ namespace RobinBird.FirebaseTools.Storage.Addressables
                                     continue;
                                 }
                                 
-                                StorageReference reference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);
-
-                                StartUrlFetch(completed, reference, firebaseUrl);
+                                StorageReference newReference = FirebaseStorage.DefaultInstance.GetReferenceFromUrl(firebaseUrl);
+                                if (reference == null || newReference.Path != reference.Path)
+                                {
+                                    reference = newReference;
+                                    StartUrlFetch(completed, reference, firebaseUrl);
+                                }
                             }
                         }
                     }
